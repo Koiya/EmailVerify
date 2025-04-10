@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "node src/EmailBot.js"
+    "start": "node src/EmailBot.js --trace-warnings"
   },
   "author": "",
   "license": "ISC",

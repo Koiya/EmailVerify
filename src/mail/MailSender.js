@@ -1,4 +1,4 @@
-let {smtpHost, email, username, password, isGoogle, isSecure, smtpPort} = require("../../config/config.json");
+let {smtpHost, email, username, password, isGoogle, smtpPort} = require("../../config/config.json");
 
 const nodemailer = require("nodemailer");
 const smtpTransport = require("nodemailer-smtp-transport");
@@ -10,11 +10,12 @@ if (typeof username === 'undefined') {
 }
 
 module.exports = class MailSender {
-    constructor(userGuilds, serverStatsAPI) {
+    constructor(userGuilds) {
         this.userGuilds = userGuilds
-        this.serverStatsAPI = serverStatsAPI
         let nodemailerOptions = {
             host: smtpHost,
+            port:25,
+            secure: false,
             auth: {
                 user: username,
                 pass: password
@@ -24,11 +25,17 @@ module.exports = class MailSender {
             }
         }
         if (isGoogle) nodemailerOptions["service"] = "gmail"
-        if (isSecure) nodemailerOptions["secure"] = isSecure
         if (smtpPort) nodemailerOptions["port"] = smtpPort
 
 
         this.transporter = nodemailer.createTransport(smtpTransport(nodemailerOptions));
+        this.transporter.verify(function (error, success) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log("Server is ready to take our messages");
+            }
+        });
     }
 
     async sendEmail(toEmail, code, name, message, emailNotify, callback) {
@@ -41,7 +48,6 @@ module.exports = class MailSender {
             };
 
             if (!isGoogle) mailOptions["bcc"] = email
-
             let language = ""
             try {
                 language = serverSettings.language
@@ -55,7 +61,6 @@ module.exports = class MailSender {
                     }
                     await message.reply(getLocale(language, "mailNegative", toEmail))
                 } else {
-                    this.serverStatsAPI.increaseMailSend()
                     callback(info.accepted[0])
                     await message.reply(getLocale(language, "mailPositive", toEmail))
                     if (emailNotify) {

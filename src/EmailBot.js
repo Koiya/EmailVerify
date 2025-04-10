@@ -6,8 +6,6 @@ const rl = require('readline').createInterface(stdin, stdout)
 const fs = require("fs");
 const {getLocale, defaultLanguage} = require('./Language')
 require("./database/ServerSettings");
-const ServerStatsAPI = require("./api/ServerStatsAPI");
-const topggAPI = require("./api/TopGG")
 const MailSender = require("./mail/MailSender")
 const messageCreate = require("./bot/messageCreate")
 const sendVerifyMessage = require("./bot/sendVerifyMessage")
@@ -17,10 +15,6 @@ const {PermissionsBitField} = require("discord.js");
 
 const bot = new Discord.Client({intents: [Discord.GatewayIntentBits.DirectMessages, Discord.GatewayIntentBits.GuildMessageReactions, Discord.GatewayIntentBits.Guilds, Discord.GatewayIntentBits.GuildMessages, Discord.GatewayIntentBits.GuildMembers]});
 
-const serverStatsAPI = new ServerStatsAPI(bot)
-
-topggAPI(bot)
-
 let emailNotify = true
 
 module.exports.userGuilds = userGuilds = new Map()
@@ -29,7 +23,7 @@ const userCodes = new Map()
 
 let userTimeouts = new Map()
 
-const mailSender = new MailSender(userGuilds, serverStatsAPI)
+const mailSender = new MailSender(userGuilds)
 
 bot.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
